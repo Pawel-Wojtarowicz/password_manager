@@ -10,7 +10,9 @@ from cryptography.fernet import Fernet
 root = Tk()
 root.title("Password Manager")
 root.eval('tk::PlaceWindow . center')
-root.geometry("400x420")
+root.geometry("410x450")
+
+# TODO: add generating secret key on first run
 
 
 def create_secret_key():
@@ -25,6 +27,11 @@ def load_secret_key():
         return key
 
 
+def clear_inputs():
+    website_input.delete(0, END)
+    login_input.delete(0, END)
+    password_input.delete(0, END)
+
 def save_to_file():
     website = website_input.get()
     login = login_input.get()
@@ -37,6 +44,9 @@ def save_to_file():
         with open("passwords.txt", "a+") as f:
             encrypted = Fernet(load_secret_key()).encrypt(password.encode())
             f.write(website + ":" + login + ":" + encrypted.decode() + "\n")
+        messagebox.showinfo(title="Success", message="Password has been saved!")
+        clear_inputs()
+        
 
 
 def load_password_file():
@@ -57,6 +67,26 @@ def generate_password():
     password = "".join([random.choice(
         string.ascii_letters + string.punctuation + string.digits) for _ in range(12)])
     password_input.insert(0, password)
+
+
+def delete_password():
+    website = website_input.get()
+    isok = messagebox.askokcancel(
+        title="Delete Password", message="Are you sure you want to delete '" + website + "'?")
+    if isok:
+        with open("passwords.txt", "r") as f:
+            lines = f.readlines()
+        with open("passwords.txt", "w") as f:
+            for line in lines:
+                #TODO: improve the matching method
+                if line.startswith(website):
+                    pass
+                else:
+                    f.write(line)
+        messagebox.showinfo(title="Success", message="Password has been deleted!")
+        clear_inputs()
+    else:
+        pass
 
 
 def exit():
@@ -89,12 +119,15 @@ generate_button = Button(text="Generate Password", command=generate_password)
 generate_button.grid(column=1, row=4, sticky="WE", pady=5)
 store_to_file_button = Button(text="Store to file", command=save_to_file)
 store_to_file_button.grid(column=1, row=5, sticky="WE", pady=5)
+delete_password_button = Button(
+    text="Delete password", command=delete_password)
+delete_password_button.grid(column=1, row=6, sticky="WE", pady=5)
 exit_button = Button(text="Exit", command=exit)
-exit_button.grid(column=1, row=7, sticky="WE", pady=10)
+exit_button.grid(column=1, row=8, sticky="WE", pady=10)
 
 # text area
-txt_area = Text(root, width=40, height=10, pady=5)
-txt_area.grid(column=1, row=6)
+txt_area = Text(root, width=42, height=10, pady=5)
+txt_area.grid(column=1, row=7)
 
 
 root.mainloop()
