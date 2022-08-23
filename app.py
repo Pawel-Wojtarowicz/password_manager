@@ -1,7 +1,7 @@
 from tkinter import *
 import string
 import random
-from os import path
+import os.path
 from tkinter import messagebox
 from cryptography.fernet import Fernet
 
@@ -12,7 +12,14 @@ root.title("Password Manager")
 root.eval('tk::PlaceWindow . center')
 root.geometry("410x450")
 
-# TODO: add generating secret key on first run if not exist
+
+def check_if_key_file_exist():
+    path = os.path.exists("key.key")
+
+    if path:
+        pass
+    else:
+        create_secret_key()
 
 
 def create_secret_key():
@@ -31,6 +38,7 @@ def clear_inputs():
     website_input.delete(0, END)
     login_input.delete(0, END)
     password_input.delete(0, END)
+    login_input.insert(0, "name@email.com")
 
 
 def save_to_file():
@@ -48,6 +56,7 @@ def save_to_file():
         messagebox.showinfo(
             title="Success", message="Password has been saved!")
         clear_inputs()
+        load_password_file()
 
 
 def load_password_file():
@@ -73,7 +82,7 @@ def generate_password():
 def delete_password():
     website = website_input.get()
     website = website + ":"
-    # TODO: add exceptions
+    deleted = False
     isok = messagebox.askokcancel(
         title="Delete Password", message="Are you sure you want to delete '" + website[:-1] + "'?")
     if isok:
@@ -82,11 +91,15 @@ def delete_password():
         with open("passwords.txt", "w") as f:
             for line in lines:
                 if website in line:
+                    deleted = True
                     pass
                 else:
                     f.write(line)
-        messagebox.showinfo(
-            title="Success", message="Password has been deleted!")
+        if deleted == True:
+            messagebox.showinfo(
+                title="Success", message="Password has been deleted!")
+        else:
+            messagebox.showinfo(title="Error", message="Password not found!")
         clear_inputs()
     else:
         pass
@@ -127,5 +140,6 @@ exit_button.grid(column=1, row=8, sticky="WE", pady=10)
 txt_area = Text(root, width=42, height=10, pady=5)
 txt_area.grid(column=1, row=7)
 
-
-root.mainloop()
+if __name__ == '__main__':
+    check_if_key_file_exist()
+    root.mainloop()
